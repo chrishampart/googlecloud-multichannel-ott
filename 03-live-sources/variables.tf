@@ -3,12 +3,6 @@ variable "project_id" {
   type        = string
 }
 
-variable "project_shortname" {
-  description = "A short name for the project, used as a prefix for resources."
-  type        = string
-  default     = "ott"
-}
-
 variable "region" {
   description = "The Google Cloud region to deploy resources into."
   type        = string
