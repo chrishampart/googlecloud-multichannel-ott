@@ -2,7 +2,7 @@
 
 This repository contains Terraform code to provision the foundational infrastructure for a multi-channel Over-The-Top (OTT) video streaming solution on Google Cloud Platform (GCP).
 
-It sets up the necessary APIs and a Google Cloud Storage bucket required for a video workflow using the [Live Stream API](https://cloud.google.com/livestream) and Google Cloud CDN.
+It sets up the necessary APIs, a live source VM, and a Google Cloud Storage bucket required for a video workflow using the [Live Stream API](https://cloud.google.com/livestream).
 
 ## Prerequisites
 
@@ -29,8 +29,11 @@ Before you begin, ensure you have the following installed and configured:
 
     ```terraform
     # terraform.tfvars
-    project_id = "your-gcp-project-id"
-    region     = "europe-west1"
+    project_id                = "your-gcp-project-id" # e.g. "my-gcp-project-123"
+    region                    = "europe-west3"      # e.g. "us-central1"
+    vpc_network_name          = "my-custom-vpc"     # Optional, defaults to "default"
+    vpc_subnetwork_name       = "my-custom-subnet"  # Optional, required for non-auto-mode VPCs
+    network_tier              = "PREMIUM"           # Optional, defaults to "STANDARD"
     ```
 
 3.  **Initialize Terraform:**
@@ -51,3 +54,6 @@ Before you begin, ensure you have the following installed and configured:
     terraform apply
     ```
 
+## Networking
+
+By default, this configuration deploys resources into the `default` VPC network. When using the default network, a firewall rule named `allow-from-iap` is automatically created. This rule allows SSH access to the VMs via Google Cloud's Identity-Aware Proxy, which is a more secure method than exposing SSH ports directly to the internet.

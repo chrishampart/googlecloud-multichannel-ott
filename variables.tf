@@ -1,31 +1,27 @@
 variable "project_id" {
-  description = "The Google Cloud project ID to deploy resources into."
+  description = "The Google Cloud project ID to deploy resources into. This is set in the common.tfvars file."
   type        = string
+}
+
+variable "project_shortname" {
+  description = "A short name for the project, used as a prefix for resources."
+  type        = string
+  default     = "ott"
 }
 
 variable "region" {
-  description = "The Google Cloud region to deploy resources into."
+  description = "The primary Google Cloud region to deploy resources into."
   type        = string
-  default     = "us-central1"
+  default     = "europe-west3"
 }
 
-variable "location" {
-  description = "The location for the GCS bucket (e.g., a region like 'US-CENTRAL1' or a multi-region like 'US')."
+variable "zone" {
+  description = "The primary Google Cloud zone to deploy resources into."
   type        = string
-  default     = "US-CENTRAL1"
+  default     = "europe-west3-a"
 }
 
-variable "bucket_name" {
-  description = "The desired name for the GCS bucket. A random suffix will be appended."
+variable "terraform_state_bucket" {
+  description = "The name of the GCS bucket where Terraform state is stored."
   type        = string
-  default     = "my-awesome-bucket"
-}
-
-variable "gcp_service_list" {
-  description = "The list of Google Cloud APIs to enable on the project."
-  type        = list(string)
-  default = [
-    "livestream.googleapis.com",
-    "compute.googleapis.com", # For Application Load Balancer
-  ]
 }
