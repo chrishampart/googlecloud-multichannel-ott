@@ -13,10 +13,6 @@ output "web_origin_bucket_name" {
   value       = google_storage_bucket.origin_buckets["web"].name
 }
 
-output "tfstate_bucket_name" {
-  description = "The name of the GCS bucket for storing Terraform state."
-  value       = google_storage_bucket.tfstate.name
-}
 
 output "project_shortname" {
   description = "A short name for the project, used as a prefix for resources and subdomains"

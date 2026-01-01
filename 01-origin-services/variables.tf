@@ -20,6 +20,7 @@ variable "gcp_service_list" {
   type        = set(string)
   default = [
     "storage.googleapis.com", # For GCS Buckets
+    "cloudresourcemanager.googleapis.com", # For Cloud Resource Manager
   ]
 }
 
@@ -35,12 +36,12 @@ variable "origin_bucket_locations" {
       location              = "EU"
       custom_data_locations = ["EUROPE-WEST1", "EUROPE-WEST3"]
       rpo                   = "ASYNC_TURBO"
-    }
+    },
     "stream" = {
       location              = "EU"
       custom_data_locations = ["EUROPE-WEST1", "EUROPE-WEST3"]
       rpo                   = "ASYNC_TURBO"
-    }
+    },
     "web" = {
       location              = "EU"
       custom_data_locations = ["EUROPE-WEST1", "EUROPE-WEST3"]

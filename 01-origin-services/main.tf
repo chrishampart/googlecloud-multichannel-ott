@@ -38,21 +38,6 @@ resource "google_storage_bucket" "origin_buckets" {
   depends_on = [google_project_service.apis]
 }
 
-# A separate, private bucket to store Terraform state files
-resource "google_storage_bucket" "tfstate" {
-  project       = var.project_id
-  name          = "${var.project_id}-tfstate"
-  location      = var.region
-  force_destroy = false # This should always be false for state buckets
-
-  uniform_bucket_level_access = true
-
-  # Enable versioning to keep a history of your state files
-  versioning {
-    enabled = true
-  }
-}
-
 # Make buckets publicly readable for the CDN
 resource "google_storage_bucket_iam_member" "public_viewer" {
   for_each = google_storage_bucket.origin_buckets

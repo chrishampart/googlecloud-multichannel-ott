@@ -1,14 +1,12 @@
 terraform {
   backend "gcs" {
-    # The bucket name must be globally unique.
-    # Using the project ID is a good way to ensure this.
-    # This must be a hardcoded, globally-unique bucket name.
-    # The bucket name must be a hardcoded string because Terraform reads this
-    # configuration during `terraform init`, *before* it evaluates variables.
-    # Using your unique GCP Project ID is a best practice to ensure the
-    # bucket name is globally unique.
-    # It should match the 'google_storage_bucket.tfstate' resource in main.tf
-    bucket = "<YOUR-PROJECT-ID>-tfstate"
+    # This bucket is created by the `00-tfstate-bootstrap` deployment.
+    # 1. Run `terraform apply` in the `00-tfstate-bootstrap` directory.
+    # 2. Copy the output `tfstate_bucket_name`.
+    # 3. Paste the bucket name here.
+    #
+    # This value must be a hardcoded string.
+    bucket = "viper-champart-vftv-tfstate" # <-- PASTE BUCKET NAME FROM BOOTSTRAP OUTPUT   
     prefix = "terraform/state/01-origin-services"
   }
 }

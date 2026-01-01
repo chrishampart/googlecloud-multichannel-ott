@@ -31,7 +31,6 @@ Before you begin, ensure you have the following installed and configured:
     # terraform.tfvars
     project_id                = "your-gcp-project-id" # e.g. "my-gcp-project-123"
     region                    = "europe-west3"      # e.g. "us-central1"
-    number_of_live_source_vms = 1                   # Optional, defaults to 1
     vpc_network_name          = "my-custom-vpc"     # Optional, defaults to "default"
     vpc_subnetwork_name       = "my-custom-subnet"  # Optional, required for non-auto-mode VPCs
     network_tier              = "PREMIUM"           # Optional, defaults to "STANDARD"

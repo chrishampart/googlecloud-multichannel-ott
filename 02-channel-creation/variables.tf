@@ -9,13 +9,7 @@ variable "region" {
   default     = "us-central1"
 }
 
-variable "number_of_channels" {
-  description = "The number of Live Stream API channels and inputs to create."
-  type        = number
-  default     = 1
-}
-
 variable "terraform_state_bucket" {
-  description = "The name of the GCS bucket where Terraform state is stored."
+  description = "Where to read the config of the other Deployments from"
   type        = string
 }

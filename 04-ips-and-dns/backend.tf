@@ -7,6 +7,6 @@ terraform {
     #
     # This value must be a hardcoded string.
     bucket = "viper-champart-vftv-tfstate" # <-- PASTE BUCKET NAME FROM BOOTSTRAP OUTPUT
-    prefix = "terraform/state/02-channel-creation"
+    prefix = "terraform/state/01-origin-services"
   }
 }
