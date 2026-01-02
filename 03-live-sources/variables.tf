@@ -43,3 +43,7 @@ variable "network_tier" {
     error_message = "The network_tier must be either STANDARD or PREMIUM."
   }
 }
+variable "terraform_state_bucket" {
+  description = "The name of the GCS bucket used for Terraform state storage."
+  type        = string
+}

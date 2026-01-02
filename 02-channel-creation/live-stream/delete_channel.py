@@ -39,11 +39,17 @@ def delete_channel(project_id: str, location: str, channel_id: str) -> empty.Emp
     client = LivestreamServiceClient()
 
     name = f"projects/{project_id}/locations/{location}/channels/{channel_id}"
-    operation = client.delete_channel(name=name)
-    response = operation.result(600)
-    print("Deleted channel")
-
-    return response
+    try:
+        operation = client.delete_channel(name=name)
+        response = operation.result(600)
+        print("Deleted channel")
+        return response
+    except Exception as e:
+        msg = str(e).lower()
+        if "not found" in msg or "404" in msg:
+            print(f"Channel {channel_id} not found. Skipping delete.")
+        else:
+            raise e
 
 
 # [END livestream_delete_channel]
