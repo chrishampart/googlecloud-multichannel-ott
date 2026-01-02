@@ -39,11 +39,17 @@ def delete_input(project_id: str, location: str, input_id: str) -> empty.Empty:
     client = LivestreamServiceClient()
 
     name = f"projects/{project_id}/locations/{location}/inputs/{input_id}"
-    operation = client.delete_input(name=name)
-    response = operation.result(600)
-    print("Deleted input")
-
-    return response
+    try:
+        operation = client.delete_input(name=name)
+        response = operation.result(600)
+        print("Deleted input")
+        return response
+    except Exception as e:
+        msg = str(e).lower()
+        if "not found" in msg or "404" in msg:
+            print(f"Input {input_id} not found. Skipping delete.")
+        else:
+            raise e
 
 
 # [END livestream_delete_input]

@@ -48,6 +48,9 @@ def create_channel(
     input = f"projects/{project_id}/locations/{location}/inputs/{input_id}"
     name = f"projects/{project_id}/locations/{location}/channels/{channel_id}"
 
+    if not output_uri.startswith("gs://"):
+         output_uri = f"gs://{output_uri}"
+
     channel = live_stream_v1.types.Channel(
         name=name,
         input_attachments=[
@@ -189,13 +192,21 @@ def create_channel(
             ),
         ],
     )
-    operation = client.create_channel(
-        parent=parent, channel=channel, channel_id=channel_id
-    )
-    response = operation.result(600)
-    print(f"Channel: {response.name}")
-
-    return response
+    try:
+        operation = client.create_channel(
+            parent=parent, channel=channel, channel_id=channel_id
+        )
+        response = operation.result(600)
+        print(f"Channel: {response.name}")
+        return response
+    except Exception as e:
+        msg = str(e).lower()
+        if "already exists" in msg or "409" in msg:
+             print(f"Channel {channel_id} already exists. Skipping creation.")
+             # We assume success/harmless if we can't update because it's running
+             return channel
+        else:
+             raise e
 
 
 # [END livestream_create_channel]

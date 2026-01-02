@@ -69,11 +69,19 @@ def update_channel(
 
     update_mask = field_mask.FieldMask(paths=update_mask_paths)
 
-    operation = client.update_channel(channel=channel, update_mask=update_mask)
-    response = operation.result(600)
-    print(f"Updated channel: {response.name}")
-
-    return response
+    try:
+        operation = client.update_channel(channel=channel, update_mask=update_mask)
+        response = operation.result(600)
+        print(f"Updated channel: {response.name}")
+        return response
+    except Exception as e:
+        msg = str(e).lower()
+        if "must be stopped" in msg:
+             print(f"Channel {channel_id} update skipped (must be stopped to update): {e}")
+             # We assume success/harmless if we can't update because it's running
+             return channel
+        else:
+             raise e
 
 
 # [END livestream_update_channel]

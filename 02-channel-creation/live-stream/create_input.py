@@ -49,11 +49,18 @@ def create_input(
     input = live_stream_v1.types.Input(
         type_=input_type,
     )
-    operation = client.create_input(parent=parent, input=input, input_id=input_id)
-    response = operation.result(900)
-    print(f"Input: {response.name}")
-
-    return response
+    try:
+        operation = client.create_input(parent=parent, input=input, input_id=input_id)
+        response = operation.result(900)
+        print(f"Input: {response.name}")
+        return response
+    except Exception as e:
+        msg = str(e).lower()
+        if "already exists" in msg or "409" in msg:
+             print(f"Input {input_id} already exists. Skipping creation.")
+             return input
+        else:
+             raise e
 
 
 # [END livestream_create_input]
