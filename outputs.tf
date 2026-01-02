@@ -1,4 +1,0 @@
-output "live_source_vm_ip" {
-  description = "A list of the public IP addresses of the live source VMs."
-  value       = [for vm in google_compute_instance.live_source_vm : vm.network_interface[0].access_config[0].nat_ip]
-}

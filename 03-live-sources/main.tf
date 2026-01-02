@@ -5,8 +5,7 @@ terraform {
       version = ">= 5.0"
     }
   }
-  # Configure the GCS backend
-  backend "gcs" {}
+
 }
 
 provider "google" {

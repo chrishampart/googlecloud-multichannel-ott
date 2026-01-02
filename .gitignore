@@ -21,3 +21,8 @@ crash.log
 
 # Exclude my Cloud Shell Code Workspace
 champart-vftv.code-workspace
+
+# Python
+__pycache__/
+*.pyc
+get-pip.py
