@@ -6,7 +6,7 @@ terraform {
     # 3. Paste the bucket name here.
     #
     # This value must be a hardcoded string.
-    bucket = "viper-champart-vftv-tfstate" # <-- PASTE BUCKET NAME FROM BOOTSTRAP OUTPUT
+    bucket = "omega-champart-scratch-tfstate" # <-- PASTE BUCKET NAME FROM BOOTSTRAP OUTPUT
     prefix = "terraform/state/03-live-sources"
   }
 }
