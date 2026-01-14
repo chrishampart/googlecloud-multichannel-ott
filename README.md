@@ -21,7 +21,7 @@ The fastest way to deploy this infrastructure is using Google Cloud Shell.
     Set your project variables. These will be used to generate the configuration files.
     ```bash
     export PROJECT_ID=$(gcloud config get-value project)
-    export REGION="us-central1"
+    export REGION="europe-west3"
     ```
 
 4.  **Create Configuration (common.tfvars)**
