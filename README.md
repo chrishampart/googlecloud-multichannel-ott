@@ -74,6 +74,7 @@ The fastest way to deploy this infrastructure is using Google Cloud Shell.
 
     # Run deployment script (enter '2' when asked for number of channels)
     cd 02-channel-creation
+    terraform init
     python3 deploy_channels.py --project_id ${PROJECT_ID}
     cd ..
     ```
