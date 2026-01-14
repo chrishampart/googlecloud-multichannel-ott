@@ -4,102 +4,101 @@ This repository contains Terraform code to provision the foundational infrastruc
 
 It sets up the necessary APIs, a live source VM, and a Google Cloud Storage bucket required for a video workflow using the [Live Stream API](https://cloud.google.com/livestream).
 
-## Prerequisites
+## Quick Start: Cloud Shell
 
-Before you begin, ensure you have the following installed and configured:
+The fastest way to deploy this infrastructure is using Google Cloud Shell.
 
-1.  [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli) (v1.0.0 or later)
-2.  [Google Cloud SDK](https://cloud.google.com/sdk/docs/install)
-3.  A Google Cloud Project with billing enabled.
-4.  Authenticated the gcloud CLI with your user account or a service account:
-    ```bash
-    gcloud auth application-default login
-    ```
+1.  **Open Cloud Shell**
+    Go to [ide.cloud.google.com](https://ide.cloud.google.com) and open a new terminal.
 
-## Usage
-
-This project is organized into sequential stages (00-05). You must deploy them in order.
-
-### prerequisites coverage
-
-1.  **Install tools:**
-    - [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli) (v1.0.0 or later)
-    - [Google Cloud SDK](https://cloud.google.com/sdk/docs/install)
-    - **Python 3, pip, and venv**:
-      ```bash
-      sudo apt update && sudo apt install -y python3-venv python3-pip
-      ```
-    - **Python dependencies**:
-      Create a virtual environment and verify the library is installed:
-      ```bash
-      cd 02-channel-creation
-      python3 -m venv venv
-      source venv/bin/activate
-      pip install google-cloud-video-live-stream
-      ```
-
-2.  **Clone the repository:**
+2.  **Clone the Repository**
     ```bash
     git clone https://github.com/chrishampart/googlecloud-multichannel-ott.git
     cd googlecloud-multichannel-ott
     ```
 
-3.  **Configure your variables:**
-    Create a `common.tfvars` file in the root of the project. This file will be used by all stages.
-
-    ```terraform
-    # common.tfvars
-    project_id                = "your-gcp-project-id"
-    region                    = "europe-west3"
-    project_shortname         = "ott"
-    terraform_state_bucket    = "your-unique-state-bucket-name"
+3.  **Configure Environment**
+    Set your project variables. These will be used to generate the configuration files.
+    ```bash
+    export PROJECT_ID=$(gcloud config get-value project)
+    export REGION="us-central1"
     ```
 
-### Deployment Steps
+4.  **Create Configuration (common.tfvars)**
+    Generate the `common.tfvars` file.
+    *Note: We use the shortname 'ott' for resource naming.*
+    ```bash
+    cat <<EOF > common.tfvars
+    project_id = "${PROJECT_ID}"
+    region     = "${REGION}"
+    zone       = "${REGION}-a"
+    project_shortname = "ott"
+    terraform_state_bucket = "ott-${PROJECT_ID}-tfstate"
+    fqdn       = "lab.reallycloudy.com"
+    EOF
+    ```
 
-1.  **00-tfstate-bootstrap**: Creates the remote state bucket.
+5.  **Bootstrap Infrastructure (Stage 00)**
+    Create the remote state bucket.
     ```bash
     cd 00-tfstate-bootstrap
     terraform init
-    terraform apply -var-file="../common.tfvars"
-    ```
-    *Note: After this step, ensure your `backend.tf` files in other directories point to the bucket name you defined.*
-
-2.  **01-origin-services**: Deploys origin storage and APIs.
-    ```bash
-    cd ../01-origin-services
-    terraform init
-    terraform apply -var-file="../common.tfvars"
+    terraform apply -var-file="../common.tfvars" -auto-approve
+    cd ..
     ```
 
-3.  **02-channel-creation**: Configures Live Stream API channels.
-    *Requires Python dependency installed (active venv).*
+6.  **Fix Backend Configurations**
+    Update the `backend.tf` files to point to your new state bucket.
     ```bash
-    cd ../02-channel-creation
-    source venv/bin/activate
-    terraform init
-    terraform apply -var-file="../common.tfvars"
+    export TF_BUCKET="ott-${PROJECT_ID}-tfstate"
+    find . -name "backend.tf" -exec sed -i "s/omega-champart-scratch-tfstate/${TF_BUCKET}/g" {} +
     ```
 
-4.  **03-live-sources**: Deploys live source VMs.
+7.  **Deploy Core Infrastructure (Stages 01-05)**
+    Run the remaining stages in sequence.
+
+    **Stage 01: Host & Origin Services**
     ```bash
-    cd ../03-live-sources
+    cd 01-origin-services
     terraform init
-    terraform apply -var-file="../common.tfvars"
+    terraform apply -var-file="../common.tfvars" -auto-approve
+    cd ..
     ```
 
-5.  **04-ips-and-dns**: Sets up static IPs and DNS.
+    **Stage 02: Deploy Live Channels**
+    This step uses a Python script to manage dynamic channel creation.
     ```bash
-    cd ../04-ips-and-dns
-    terraform init
-    terraform apply -var-file="../common.tfvars"
+    # Install dependencies
+    pip3 install -r 02-channel-creation/live-stream/requirements.txt
+
+    # Run deployment script (enter '2' when asked for number of channels)
+    cd 02-channel-creation
+    python3 deploy_channels.py
+    cd ..
     ```
 
-6.  **05-load-balancer**: Deploys the Load Balancer.
+    **Stage 03: Live Sources**
     ```bash
-    cd ../05-load-balancer
+    cd 03-live-sources
     terraform init
-    terraform apply -var-file="../common.tfvars"
+    terraform apply -var-file="../common.tfvars" -auto-approve
+    cd ..
+    ```
+
+    **Stage 04: IPs and DNS**
+    ```bash
+    cd 04-ips-and-dns
+    terraform init
+    terraform apply -var-file="../common.tfvars" -auto-approve
+    cd ..
+    ```
+
+    **Stage 05: Global Load Balancer**
+    ```bash
+    cd 05-load-balancer
+    terraform init
+    terraform apply -var-file="../common.tfvars" -auto-approve
+    cd ..
     ```
 
 ## Networking
