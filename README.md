@@ -33,7 +33,7 @@ The fastest way to deploy this infrastructure is using Google Cloud Shell.
     region     = "${REGION}"
     zone       = "${REGION}-a"
     project_shortname = "ott"
-    terraform_state_bucket = "ott-multichannel-ott-${PROJECT_ID}-tfstate"
+    terraform_state_bucket = "ott-${PROJECT_ID}-tfstate"
     fqdn       = "lab.reallycloudy.com"
     EOF
     ```
@@ -50,7 +50,7 @@ The fastest way to deploy this infrastructure is using Google Cloud Shell.
 6.  **Fix Backend Configurations**
     Update the `backend.tf` files to point to your new state bucket.
     ```bash
-    export TF_BUCKET="ott-multichannel-ott-${PROJECT_ID}-tfstate"
+    export TF_BUCKET="ott-${PROJECT_ID}-tfstate"
     find . -name "backend.tf" -exec sed -i "s/omega-champart-scratch-tfstate/${TF_BUCKET}/g" {} +
     ```
 
