@@ -49,9 +49,10 @@ The fastest way to deploy this infrastructure is using Google Cloud Shell.
 
 6.  **Fix Backend Configurations**
     Update the `backend.tf` files to point to your new state bucket.
+    *This command finds all `backend.tf` files and updates the `bucket` field to match your created bucket.*
     ```bash
     export TF_BUCKET="ott-${PROJECT_ID}-tfstate"
-    find . -name "backend.tf" -exec sed -i "s/omega-champart-scratch-tfstate/${TF_BUCKET}/g" {} +
+    find . -name "backend.tf" -exec sed -i "s/bucket = \"[^\"]*\"/bucket = \"${TF_BUCKET}\"/g" {} +
     ```
 
 7.  **Deploy Core Infrastructure (Stages 01-05)**
