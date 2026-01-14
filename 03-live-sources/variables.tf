@@ -21,6 +21,12 @@ variable "number_of_live_source_vms" {
   default     = 1
 }
 
+variable "machine_type" {
+  description = "The machine type to use for the live source VMs."
+  type        = string
+  default     = "c2d-standard-2"
+}
+
 variable "vpc_network_name" {
   description = "The name of the VPC network to deploy the VMs into."
   type        = string

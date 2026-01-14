@@ -17,3 +17,8 @@ output "gclb_ip_address" {
   description = "The global IP address reserved for the load balancer."
   value       = google_compute_global_address.gclb_ip.address
 }
+
+output "ssl_certificate_self_link" {
+  description = "The self-link of the created Google-managed SSL certificate."
+  value       = google_compute_managed_ssl_certificate.default.self_link
+}
