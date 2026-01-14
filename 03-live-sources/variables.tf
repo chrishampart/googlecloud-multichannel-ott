@@ -21,6 +21,12 @@ variable "number_of_live_source_vms" {
   default     = 1
 }
 
+variable "machine_type" {
+  description = "The machine type to use for the live source VMs."
+  type        = string
+  default     = "c2d-standard-2"
+}
+
 variable "vpc_network_name" {
   description = "The name of the VPC network to deploy the VMs into."
   type        = string
@@ -42,4 +48,8 @@ variable "network_tier" {
     condition     = contains(["STANDARD", "PREMIUM"], var.network_tier)
     error_message = "The network_tier must be either STANDARD or PREMIUM."
   }
+}
+variable "terraform_state_bucket" {
+  description = "The name of the GCS bucket used for Terraform state storage."
+  type        = string
 }

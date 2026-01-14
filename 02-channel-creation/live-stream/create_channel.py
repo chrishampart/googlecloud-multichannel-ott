@@ -108,13 +108,20 @@ def create_channel(
             ),
         ],
     )
-    operation = client.create_channel(
-        parent=parent, channel=channel, channel_id=channel_id
-    )
-    response = operation.result(600)
-    print(f"Channel: {response.name}")
-
-    return response
+    try:
+        operation = client.create_channel(
+            parent=parent, channel=channel, channel_id=channel_id
+        )
+        response = operation.result(600)
+        print(f"Channel: {response.name}")
+        return response
+    except Exception as e:
+        if "409" in str(e) and "Already Exists" in str(e):
+             print(f"Channel {channel_id} already exists. Skipping creation.")
+             # We can try to get the existing channel to return it, or just return None/dummy
+             return channel
+        else:
+             raise e
 
 
 # [END livestream_create_channel]

@@ -14,24 +14,25 @@ provider "google" {
 }
 
 resource "google_compute_address" "live_source_ip" {
-  count        = var.number_of_live_source_vms
+  for_each     = data.terraform_remote_state.channel_creation.outputs.input_uris
   project      = var.project_id
-  name         = format("live-source%02d-ipv4", count.index + 1)
+  name         = "live-source-${each.key}-ipv4"
   region       = var.region
   network_tier = var.network_tier
 }
 
 resource "google_compute_instance" "live_source_vm" {
-  count        = var.number_of_live_source_vms
+  for_each     = data.terraform_remote_state.channel_creation.outputs.input_uris
   project      = var.project_id
   zone         = var.zone
-  name         = format("live-source%02d", count.index + 1)
-  machine_type = "c2d-standard-2"
+  name         = "live-source-${each.key}"
+  machine_type = var.machine_type
   tags         = ["http-server", "https-server", "allow-iap-ssh"]
 
   boot_disk {
     initialize_params {
       image = "ubuntu-os-cloud/ubuntu-2204-lts"
+      size  = 30
     }
   }
 
@@ -39,7 +40,7 @@ resource "google_compute_instance" "live_source_vm" {
     network    = var.vpc_network_name
     subnetwork = var.vpc_subnetwork_name
     access_config {
-      nat_ip       = google_compute_address.live_source_ip[count.index].address
+      nat_ip       = google_compute_address.live_source_ip[each.key].address
       network_tier = var.network_tier
     }
   }
@@ -49,6 +50,54 @@ resource "google_compute_instance" "live_source_vm" {
     #!/bin/bash
     apt-get update -y
     apt-get install -y ffmpeg
+
+    # Create the streaming script
+    cat <<'EOF' > /usr/local/bin/stream_loop.sh
+    #!/bin/bash
+    
+    # allow for upload of a .mp4 or .ts file to replace the default test card
+    # if a file named input.mp4 exists in /root/ then stream that instead
+    
+    INPUT_FILE="testsrc2=size=1920x1080:rate=30 [out0]; sine=frequency=500 [out1]"
+    INPUT_FORMAT="-f lavfi"
+    
+    if [ -f /root/input.mov ]; then
+      INPUT_FILE="/root/input.mov"
+      INPUT_FORMAT=""
+    elif [ -f /root/input.mp4 ]; then
+      INPUT_FILE="/root/input.mp4"
+      INPUT_FORMAT=""
+    elif [ -f /root/input.ts ]; then
+      INPUT_FILE="/root/input.ts"
+      INPUT_FORMAT=""
+    fi
+
+    /usr/bin/ffmpeg -re -stream_loop -1 $INPUT_FORMAT -i "$INPUT_FILE" \
+      -vf "drawtext=text='Google Cloud Live Stream API':x=w*0.03:y=h*0.07:fontsize=72:fontcolor=white:box=1:boxcolor=black, drawtext=text='${title(replace(each.key, "-", " "))}':x=w*0.03:y=h*0.07+85:fontsize=72:fontcolor=white:box=1:boxcolor=black" \
+      -acodec aac -vcodec h264 -preset ultrafast \
+      -f mpegts "${each.value}"
+    EOF
+
+    chmod +x /usr/local/bin/stream_loop.sh
+
+    # Create the systemd service
+    cat <<EOF > /etc/systemd/system/live-stream.service
+    [Unit]
+    Description=FFmpeg Live Stream
+    After=network.target
+
+    [Service]
+    ExecStart=/usr/local/bin/stream_loop.sh
+    Restart=always
+    User=root
+
+    [Install]
+    WantedBy=multi-user.target
+    EOF
+
+    systemctl daemon-reload
+    systemctl enable live-stream
+    systemctl start live-stream
   EOT
 
   // Allows the VM to interact with other Google Cloud services

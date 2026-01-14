@@ -26,37 +26,59 @@ data "terraform_remote_state" "origin_services" {
 }
 
 resource "null_resource" "create_livestream_channels" {
-  # This provisioner will run your Python script.
-  # It will re-run if the number of channels changes.
+  count = length(var.channels)
+
   triggers = {
-  #  channel_count = var.number_of_channels
+    channel_id    = var.channels[count.index].id
+    input_id      = var.channels[count.index].input_id
     stream_bucket = data.terraform_remote_state.origin_services.outputs.stream_origin_bucket_name
+    project_id    = var.project_id
+    region        = var.region
   }
-  /*
+
   provisioner "local-exec" {
-    # Example command to run your script. You will need to build out this script.
     command = <<EOT
       set -e
-      echo "Executing Livestream creation scripts..."
-      
-      python3 ${path.module}/live-stream/create_input.py --project-id ${var.project_id} --location ${var.region} --channel-count ${var.number_of_channels} --output-bucket ${self.triggers.stream_bucket} && \
-      python3 ${path.module}/live-stream/create_channel.py --project-id ${var.project_id} --location ${var.region} --channel-count ${var.number_of_channels} --output-bucket ${self.triggers.stream_bucket} && \
-      python3 ${path.module}/live-stream/create_channel2.py --project-id ${var.project_id} --location ${var.region} --channel-count ${var.number_of_channels} --output-bucket ${self.triggers.stream_bucket}
-      
-      echo "Livestream scripts finished."
+      echo "Creating Input: ${self.triggers.input_id}..."
+      ${path.module}/venv/bin/python3 ${path.module}/live-stream/create_input.py \
+        --project_id ${self.triggers.project_id} \
+        --location ${self.triggers.region} \
+        --input_id ${self.triggers.input_id} \
+        --input_type SRT_PUSH
+
+      echo "Creating Channel: ${self.triggers.channel_id}..."
+      ${path.module}/venv/bin/python3 ${path.module}/live-stream/create_channel2.py \
+        --project_id ${self.triggers.project_id} \
+        --location ${self.triggers.region} \
+        --channel_id ${self.triggers.channel_id} \
+        --input_id ${self.triggers.input_id} \
+        --output_uri ${self.triggers.stream_bucket}/live/${self.triggers.channel_id}
+
+      echo "Updating Channel Logs: ${self.triggers.channel_id}..."
+      ${path.module}/venv/bin/python3 ${path.module}/live-stream/update_channel.py \
+        --project_id ${self.triggers.project_id} \
+        --location ${self.triggers.region} \
+        --channel_id ${self.triggers.channel_id} \
+        --input_id ${self.triggers.input_id} \
+        --log_config INFO
+
+      echo "Starting Channel: ${self.triggers.channel_id} (Timeout 30s)..."
+      timeout 30s ${path.module}/venv/bin/python3 ${path.module}/live-stream/start_channel.py \
+        --project_id ${self.triggers.project_id} \
+        --location ${self.triggers.region} \
+        --channel_id ${self.triggers.channel_id} || true
+
+      echo "Checking Channel Status: ${self.triggers.channel_id}..."
+      ${path.module}/venv/bin/python3 ${path.module}/live-stream/get_channel.py \
+        --project_id ${self.triggers.project_id} \
+        --location ${self.triggers.region} \
+        --channel_id ${self.triggers.channel_id}
     EOT
   }
-  */
-  provisioner "local-exec" {
-    # Example command to run your script. You will need to build out this script.
-    command = <<EOT
-      set -e
-      echo "Executing Livestream get scripts..."
-      
-      python3 ${path.module}/live-stream/list_inputs.py --project_id ${var.project_id} --location ${var.region}   && \
-      python3 ${path.module}/live-stream/list_channels.py --project_id ${var.project_id} --location ${var.region}  && \
-      
-      echo "Livestream get scripts finished."
-    EOT
-  }
+}
+
+data "external" "input_uris" {
+  program = ["${path.module}/venv/bin/python3", "${path.module}/live-stream/get_input_uris.py", "--project_id", var.project_id, "--location", var.region]
+  
+  depends_on = [null_resource.create_livestream_channels]
 }

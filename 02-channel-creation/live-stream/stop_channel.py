@@ -41,11 +41,20 @@ def stop_channel(
     client = LivestreamServiceClient()
 
     name = f"projects/{project_id}/locations/{location}/channels/{channel_id}"
-    operation = client.stop_channel(name=name)
-    response = operation.result(600)
-    print("Stopped channel")
-
-    return response
+    try:
+        operation = client.stop_channel(name=name)
+        response = operation.result(600)
+        print("Stopped channel")
+        return response
+    except Exception as e:
+        msg = str(e).lower()
+        if "not found" in msg or "404" in msg:
+            print(f"Channel {channel_id} not found. Skipping stop.")
+        elif "failed_precondition" in msg or "invalid resource state" in msg:
+            # Usually means it's already stopped or in a state where it can't be stopped
+            print(f"Channel {channel_id} could not be stopped (likely already stopped). Message: {e}")
+        else:
+            raise e
 
 
 # [END livestream_stop_channel]

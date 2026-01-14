@@ -41,11 +41,20 @@ def start_channel(
     client = LivestreamServiceClient()
 
     name = f"projects/{project_id}/locations/{location}/channels/{channel_id}"
-    operation = client.start_channel(name=name)
-    response = operation.result(900)
-    print("Started channel")
-
-    return response
+    try:
+        operation = client.start_channel(name=name)
+        response = operation.result(900)
+        print("Started channel")
+        return response
+    except Exception as e:
+        # If channel is already started, it might fail. We can ignore it or print info.
+        # Common error: "FAILED_PRECONDITION: Channel <id> is already in state RUNNING/STARTING"
+        msg = str(e).lower()
+        if "already" in msg or "state" in msg:
+             print(f"Channel {channel_id} start request skipped (likely already active): {e}")
+             return None
+        else:
+             raise e
 
 
 # [END livestream_start_channel]
