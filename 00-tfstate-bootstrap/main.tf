@@ -17,7 +17,7 @@ provider "google" {
 resource "google_storage_bucket" "tfstate" {
   project                     = var.project_id
   # Bucket names must be globally unique.
-  name                        = "${var.project_shortname}-${var.project_id}-tfstate"
+  name                        = var.terraform_state_bucket
   location                    = var.region
   force_destroy               = false # Critical for state buckets
   uniform_bucket_level_access = true

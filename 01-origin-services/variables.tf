@@ -21,6 +21,9 @@ variable "gcp_service_list" {
   default = [
     "storage.googleapis.com", # For GCS Buckets
     "cloudresourcemanager.googleapis.com", # For Cloud Resource Manager
+    "livestream.googleapis.com", # For Live Stream API
+    "compute.googleapis.com",    # For Compute Engine (VMs)
+    "dns.googleapis.com",        # For Cloud DNS
   ]
 }
 

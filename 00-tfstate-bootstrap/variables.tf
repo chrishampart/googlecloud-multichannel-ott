@@ -14,3 +14,8 @@ variable "region" {
   type        = string
   default     = "europe-west3"
 }
+
+variable "terraform_state_bucket" {
+  description = "The name of the Terraform state bucket to create."
+  type        = string
+}
