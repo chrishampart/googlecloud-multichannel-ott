@@ -33,8 +33,8 @@ The fastest way to deploy this infrastructure is using Google Cloud Shell.
     region     = "${REGION}"
     zone       = "${REGION}-a"
     project_shortname = "ott"
-    terraform_state_bucket = "ott-${PROJECT_ID}-tfstate"
-    fqdn       = "lab.reallycloudy.com"
+    terraform_state_bucket = "${PROJECT_ID}-tfstate"
+    fqdn       = "reallycloudy.com"
     EOF
     ```
 
@@ -51,7 +51,7 @@ The fastest way to deploy this infrastructure is using Google Cloud Shell.
     Update the `backend.tf` files to point to your new state bucket.
     *This command finds all `backend.tf` files and updates the `bucket` field to match your created bucket.*
     ```bash
-    export TF_BUCKET="ott-${PROJECT_ID}-tfstate"
+    export TF_BUCKET="${PROJECT_ID}-tfstate"
     find . -name "backend.tf" -exec sed -i "s/bucket = \"[^\"]*\"/bucket = \"${TF_BUCKET}\"/g" {} +
     ```
 
@@ -69,13 +69,18 @@ The fastest way to deploy this infrastructure is using Google Cloud Shell.
     **Stage 02: Deploy Live Channels**
     This step uses a Python script to manage dynamic channel creation.
     ```bash
+    cd 02-channel-creation
+    
+    # Create and activate virtual environment
+    python3 -m venv venv
+    source venv/bin/activate
+
     # Install dependencies
-    pip3 install -r 02-channel-creation/live-stream/requirements.txt
+    pip install -r live-stream/requirements.txt
 
     # Run deployment script (enter '2' when asked for number of channels)
-    cd 02-channel-creation
     terraform init
-    python3 deploy_channels.py --project_id ${PROJECT_ID}
+    python deploy_channels.py --project_id ${PROJECT_ID}
     cd ..
     ```
 
