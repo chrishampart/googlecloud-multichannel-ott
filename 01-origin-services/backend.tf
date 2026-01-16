@@ -6,7 +6,7 @@ terraform {
     # 3. Paste the bucket name here.
     #
     # This value must be a hardcoded string.
-    bucket = "champart-mc-ott-tfstate" # <-- PASTE BUCKET NAME FROM BOOTSTRAP OUTPUT
+    bucket = "project_id-tfstate" # <-- PASTE BUCKET NAME FROM BOOTSTRAP OUTPUT
     prefix = "terraform/state/01-origin-services"
   }
 }
